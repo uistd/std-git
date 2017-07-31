@@ -1,0 +1,34 @@
+{
+  "name": "ffan/php/git",
+  "description": "FFan php git components",
+  "keywords": [
+    "ffan",
+    "php",
+    "signal"
+  ],
+  "type": "composer",
+  "authors": [
+    {
+      "name": "huangshunzhao",
+      "email": "huangshunzhao@wanda.cn",
+      "role": "Founder and project lead"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0",
+    "ffan/php/utils": "*",
+    "ffan/php/logger": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "ffan\\php\\git\\": ""
+    }
+  },
+  "minimum-stability": "dev",
+  "archive": {
+    "exclude": [
+      "test",
+      ".gitignore"
+    ]
+  }
+}
