@@ -16,12 +16,7 @@ class GitRepo extends ConfigBase
     private $repo_path;
 
     /**
-     * @var string 执行错误
-     */
-    private $std_error;
-
-    /**
-     * @var string aliasa 名称
+     * @var string 配置名称
      */
     private $name;
 
@@ -36,6 +31,11 @@ class GitRepo extends ConfigBase
     private $logger;
 
     /**
+     * @var array 结果消息
+     */
+    private $result_msg;
+
+    /**
      * GitRepo constructor.
      * @param string $name
      * @param array $config_arr
@@ -47,24 +47,68 @@ class GitRepo extends ConfigBase
         $this->logger = LoggerFactory::get($this->getConfigString('log_file', 'git'));
         $this->bin_path = $this->getConfigString('git_bin', '/usr/bin/git');
         $this->repo_path = FFanUtils::fixWithRuntimePath($this->getConfigString('repo_path', $this->name));
-        $this->init();
     }
 
     /**
      * 初始化
      */
-    private function init()
+    public function init()
     {
-        if (!is_dir($this->repo_path) || !is_file(FFanUtils::joinPath($this->repo_path, '.git'))) {
+        if (!is_dir($this->repo_path) || !is_dir(FFanUtils::joinPath($this->repo_path, '.git'))) {
             $this->cloneFromRemote();
+            $branch = $this->getConfigString('branch');
+            if (!empty($branch)) {
+                $this->checkout($branch);
+            }
+            $user_name = $this->getConfigString('username');
+            $email = $this->getConfigString('email');
+            if (!empty($user_name) && !empty($email)) {
+                $this->runCommand('config user.name ' . escapeshellcmd($user_name));
+                $this->runCommand('config user.email ' . escapeshellcmd($email));
+            }
+        } else {
+            $this->pull();
         }
-        $branch = $this->getConfigString('branch');
-        $this->checkout($branch);
+        $this->pushResult('done!');
+    }
 
+    /**
+     * 运行结果
+     * @param string $msg
+     */
+    private function pushResult($msg)
+    {
+        if (!is_array($this->result_msg)) {
+            $this->result_msg = array();
+        }
+        $this->result_msg[] = $msg;
+    }
+
+    /**
+     * 设置结果数组
+     * @param array $result_msg
+     */
+    public function setResultMsg(array &$result_msg)
+    {
+        $this->result_msg = &$result_msg;
+    }
+
+    /**
+     * 获取执行结果¬
+     * @return string
+     */
+    public function getResultMsg()
+    {
+        if (empty($this->result_msg)) {
+            return '';
+        }
+        return join(PHP_EOL, $this->result_msg);
     }
 
     /**
      * 从远程克隆
+     * @return array
+     * @throws InvalidConfigException
      */
     private function cloneFromRemote()
     {
@@ -72,52 +116,70 @@ class GitRepo extends ConfigBase
         if (empty($url)) {
             throw new InvalidConfigException('Can not get git remote url config');
         }
-        $this->runCommand('clone '. $url .' '. $this->repo_path);
+        return $this->runCommand('clone ' . $url . ' ' . $this->repo_path);
     }
 
     /**
      * 运行git 命令
      * @param string $command
-     * @return string
+     * @return array
      */
     private function runCommand($command)
+    {
+        $command = $this->bin_path . ' ' . $command;
+        return $this->executeCommand($command);
+    }
+
+    /**
+     * 执行linux 命令
+     * @param string $command
+     * @return array;
+     */
+    private function executeCommand($command)
     {
         $fd_pec = array(
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),
         );
-
         $pipes = array();
-        $command = $this->bin_path . ' ' . $command;
         $this->logger->info($command);
+        $this->pushResult($command);
         $resource = proc_open($command, $fd_pec, $pipes, $this->repo_path);
         $stdout = stream_get_contents($pipes[1]);
-        $this->std_error = stream_get_contents($pipes[2]);
+        $stderr = stream_get_contents($pipes[2]);
         fclose($pipes[1]);
         fclose($pipes[2]);
         proc_close($resource);
+        $result = '';
         if (!empty($stdout)) {
-            $this->logger->info($stdout);
+            $result .= "\n" . $stdout;
         }
-        if (!empty($this->std_error)) {
-            $this->logger->info($this->std_error);
+        if (!empty($stderr)) {
+            $result .= "\n" . $stderr;
         }
-        return $stdout;
+        $this->pushResult($result);
+        $this->logger->info($result);
+        return array('cmd' => $command, 'result' => $result);
     }
 
     /**
      * 获取状态
-     * @return string
+     * @param bool $is_short 是否是简洁模式
+     * @return array
      */
-    public function status()
+    public function status($is_short = false)
     {
-        return $this->runCommand('status');
+        $cmd = 'status';
+        if ($is_short) {
+            $cmd .= ' -s';
+        }
+        return $this->runCommand($cmd);
     }
 
     /**
      * 添加文件
      * @param string $files
-     * @return string
+     * @return array
      */
     public function add($files = '*')
     {
@@ -127,52 +189,77 @@ class GitRepo extends ConfigBase
     /**
      * 提交
      * @param string $message
-     * @return string
+     * @return array
      */
     public function commit($message)
     {
-        return $this->runCommand('commint -m ' . escapeshellarg($message));
+        return $this->runCommand('commit -m ' . escapeshellarg($message));
     }
 
     /**
      * 切换分支
-     * @param string $branche
-     * @return string
+     * @param string $branch
+     * @return array
      */
-    public function checkout($branche)
+    public function checkout($branch)
     {
-        return $this->runCommand('checkout ' . escapeshellarg($branche));
+        return $this->runCommand('checkout ' . escapeshellarg($branch));
     }
 
     /**
      * 推送
      * @param string $remote
-     * @param string $branche
-     * @return string
+     * @param string $branch
+     * @return array
      */
-    public function push($remote = '', $branche = '')
+    public function push($remote = '', $branch = '')
     {
-        return $this->runCommand('push ' . $remote . ' ' . $branche);
+        return $this->runCommand('push ' . $remote . ' ' . $branch);
     }
 
     /**
      * 拉代码
-     * @param string $remote
-     * @param string $branche
-     * @return string
+     * @param string $remote 远程仓库地址
+     * @param string $branch 分支
+     * @return array
      */
-    public function pull($remote = '', $branche = '')
+    public function pull($remote = '', $branch = '')
     {
-        return $this->runCommand('pull ' . $remote . ' ' . $branche);
+        $cmd = 'pull';
+        if (!empty($remote)) {
+            $cmd .= ' ' . $remote;
+        }
+        if (!empty($branch)) {
+            $cmd .= ' ' . $branch;
+        }
+        return $this->runCommand($cmd);
     }
 
     /**
      * merge
      * @param $branch
-     * @return string
+     * @return array
      */
     public function merge($branch)
     {
         return $this->runCommand('merge ' . escapeshellarg($branch) . ' --no-ff');
+    }
+
+    /**
+     * 获取所在的目录
+     */
+    public function getRepoPath()
+    {
+        return $this->repo_path;
+    }
+
+    /**
+     * 执行git 命令
+     * @param string $cmd
+     * @return array
+     */
+    public function run($cmd)
+    {
+        return $this->runCommand($cmd);
     }
 }
