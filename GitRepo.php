@@ -66,8 +66,6 @@ class GitRepo extends ConfigBase
                 $this->runCommand('config user.name ' . escapeshellcmd($user_name));
                 $this->runCommand('config user.email ' . escapeshellcmd($email));
             }
-        } else {
-            $this->pull();
         }
         $this->pushResult('done!');
     }
@@ -251,6 +249,29 @@ class GitRepo extends ConfigBase
     public function getRepoPath()
     {
         return $this->repo_path;
+    }
+
+    /**
+     * 获取本地分支列表
+     * @return array
+     */
+    public function getLocalBranch()
+    {
+       $result = $this->runCommand('branch');
+       $branch_list = explode(PHP_EOL, $result['result']);
+       $result = array();
+       foreach ($branch_list as $item) {
+           $item = trim($item);
+           if (empty($item)) {
+               continue;
+           }
+           if ('*' === $item{0}) {
+               $item = ltrim($item, '* ');
+               $result['use'] = $item;
+           }
+           $result['branch'][] = $item;
+       }
+       return $result;
     }
 
     /**
