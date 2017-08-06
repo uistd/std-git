@@ -207,18 +207,14 @@ class GitRepo extends ConfigBase
     /**
      * 拉取远程分支到本地
      * @param string $branch
-     * @param string $local_branch
      * @return array
      */
-    public function fetch($branch, $local_branch = null)
+    public function fetch($branch)
     {
         if (!is_string($branch) || empty($branch)) {
             throw new \InvalidArgumentException('Invalid branch');
         }
-        if (empty($local_branch)) {
-            $local_branch = $branch;
-        }
-        $cmd = 'fetch origin '. escapeshellcmd($branch) .':'. escapeshellcmd($local_branch);
+        $cmd = 'checkout --track origin/'. escapeshellarg($branch);
         return $this->runCommand($cmd);
     }
 
