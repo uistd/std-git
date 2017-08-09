@@ -177,11 +177,17 @@ class GitRepo extends ConfigBase
     /**
      * 添加文件
      * @param string $files
+     * @param string $arg add 参数
      * @return array
      */
-    public function add($files = '*')
+    public function add($files = '*', $arg = '')
     {
-        return $this->runCommand("add $files -v");
+        $files = escapeshellarg($files);
+        $cmd = 'add '. $files;
+        if (!empty($arg)) {
+            $cmd .= ' -'. $arg;
+        }
+        return $this->runCommand($cmd);
     }
 
     /**
@@ -271,21 +277,21 @@ class GitRepo extends ConfigBase
      */
     public function getLocalBranch()
     {
-       $result = $this->runCommand('branch');
-       $branch_list = explode(PHP_EOL, $result['result']);
-       $result = array();
-       foreach ($branch_list as $item) {
-           $item = trim($item);
-           if (empty($item)) {
-               continue;
-           }
-           if ('*' === $item{0}) {
-               $item = ltrim($item, '* ');
-               $result['use'] = $item;
-           }
-           $result['branch'][] = $item;
-       }
-       return $result;
+        $result = $this->runCommand('branch');
+        $branch_list = explode(PHP_EOL, $result['result']);
+        $result = array();
+        foreach ($branch_list as $item) {
+            $item = trim($item);
+            if (empty($item)) {
+                continue;
+            }
+            if ('*' === $item{0}) {
+                $item = ltrim($item, '* ');
+                $result['use'] = $item;
+            }
+            $result['branch'][] = $item;
+        }
+        return $result;
     }
 
     /**
