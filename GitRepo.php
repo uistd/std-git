@@ -7,6 +7,7 @@ use ffan\php\logger\LoggerFactory;
 use ffan\php\utils\ConfigBase;
 use ffan\php\utils\InvalidConfigException;
 use ffan\php\utils\Utils as FFanUtils;
+use ffan\php\utils\Str as FFanStr;
 
 class GitRepo extends ConfigBase
 {
@@ -302,5 +303,34 @@ class GitRepo extends ConfigBase
     public function run($cmd)
     {
         return $this->runCommand($cmd);
+    }
+
+    /**
+     * 获取所有变更过的文件
+     * @param bool $ignore_tmp_file 是否过滤以 . 开始的文件
+     * @return array
+     */
+    public function getChangeFiles($ignore_tmp_file = true)
+    {
+        $result = array();
+        $run_re = $this->status(true);
+        $status_str = $run_re['result'];
+        if (empty($status_str)) {
+            return $result;
+        }
+        $status_lines = FFanStr::split($status_str, PHP_EOL);
+        foreach( $status_lines as $each_line) {
+            $tmp = FFanStr::split($each_line, ' ');
+            //如果是以 . 开始的文件, 忽略
+            if (empty($tmp[1])) {
+                continue;
+            }
+            $file = $tmp[1];
+            if ('.' === $file{0} && $ignore_tmp_file) {
+                continue;
+            }
+            $result[] = $file;
+        }
+        return $result;
     }
 }
