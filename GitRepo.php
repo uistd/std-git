@@ -52,11 +52,16 @@ class GitRepo extends ConfigBase
 
     /**
      * 初始化
+     * @return bool
      */
     public function init()
     {
-        if (!is_dir($this->repo_path) || !is_dir(FFanUtils::joinPath($this->repo_path, '.git'))) {
+        $git_dir = FFanUtils::joinPath($this->repo_path, '.git');
+        if (!is_dir($this->repo_path) || !is_dir($git_dir)) {
             $this->cloneFromRemote();
+            if (!is_dir($git_dir)) {
+                return false;
+            }
             $branch = $this->getConfigString('branch');
             if (!empty($branch)) {
                 $this->checkout($branch);
@@ -69,6 +74,7 @@ class GitRepo extends ConfigBase
             }
         }
         $this->pushResult('Git init');
+        return true;
     }
 
     /**
