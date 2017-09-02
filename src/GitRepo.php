@@ -1,14 +1,18 @@
 <?php
 
-namespace ffan\php\git;
+namespace FFan\Std\Git;
 
-use ffan\php\logger\Logger;
-use ffan\php\logger\LoggerFactory;
-use ffan\php\utils\ConfigBase;
-use ffan\php\utils\InvalidConfigException;
-use ffan\php\utils\Utils as FFanUtils;
-use ffan\php\utils\Str as FFanStr;
+use FFan\Std\Common\ConfigBase;
+use FFan\Std\Common\InvalidConfigException;
+use FFan\Std\Common\Utils as FFanUtils;
+use FFan\Std\Common\Str as FFanStr;
+use FFan\Std\Logger\LogHelper;
+use FFan\Std\Logger\LogRouter;
 
+/**
+ * Class GitRepo
+ * @package FFan\Std\Git
+ */
 class GitRepo extends ConfigBase
 {
     /**
@@ -27,7 +31,7 @@ class GitRepo extends ConfigBase
     private $bin_path;
 
     /**
-     * @var Logger
+     * @var LogRouter
      */
     private $logger;
 
@@ -45,7 +49,7 @@ class GitRepo extends ConfigBase
     {
         $this->name = $name;
         $this->initConfig($config_arr);
-        $this->logger = LoggerFactory::get($this->getConfigString('log_file', 'git'));
+        $this->logger = LogHelper::getLogRouter();
         $this->bin_path = $this->getConfigString('git_bin', '/usr/bin/git');
         $this->repo_path = FFanUtils::fixWithRuntimePath($this->getConfigString('repo_path', $this->name));
     }

@@ -16,12 +16,12 @@
   ],
   "require": {
     "php": ">=5.5.0",
-    "ffan/php-utils": "*",
-    "ffan/php-logger": "*"
+    "ffan/std-common": "2.*",
+    "ffan/std-logger": "1.*"
   },
   "autoload": {
     "psr-4": {
-      "ffan\\php\\git\\": ""
+      "FFan\\Std\\Git\\": "src"
     }
   },
   "minimum-stability": "dev",

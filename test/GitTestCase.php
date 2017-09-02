@@ -1,8 +1,14 @@
 <?php
 
-namespace ffan\php\git;
+namespace FFan\Std\Git;
+
+use FFan\Std\Logger\FileLogger;
 
 require_once '../vendor/autoload.php';
 require_once 'config.php';
 
-Git::get('main');
+new FileLogger('logs', 'git');
+
+$git = Git::get('main');
+
+$git->init();

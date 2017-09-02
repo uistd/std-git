@@ -1,10 +1,14 @@
 <?php
 
-namespace ffan\php\git;
+namespace FFan\Std\Git;
 
-use ffan\php\utils\Factory as FFanFactory;
-use ffan\php\utils\InvalidConfigException;
+use FFan\Std\Common\Factory as FFanFactory;
+use FFan\Std\Common\InvalidConfigException;
 
+/**
+ * Class Git
+ * @package FFan\Std\Git
+ */
 class Git extends FFanFactory
 {
     /**
@@ -15,13 +19,12 @@ class Git extends FFanFactory
     /**
      * 获取一个缓存实例
      * @param string $config_name
-     * @return GitRepo
+     * @return GitRepo|object
      * @throws InvalidConfigException
      */
     public static function get($config_name = 'main')
     {
-        $obj = self::getInstance($config_name);
-        return $obj;
+        return self::getInstance($config_name);
     }
 
     /**
