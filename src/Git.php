@@ -1,20 +1,20 @@
 <?php
 
-namespace FFan\Std\Git;
+namespace UiStd\Git;
 
-use FFan\Std\Common\Factory as FFanFactory;
-use FFan\Std\Common\InvalidConfigException;
+use UiStd\Common\Factory as UisFactory;
+use UiStd\Common\InvalidConfigException;
 
 /**
  * Class Git
- * @package FFan\Std\Git
+ * @package UiStd\Git
  */
-class Git extends FFanFactory
+class Git extends UisFactory
 {
     /**
      * @var string 配置组名
      */
-    protected static $config_group = 'ffan-git';
+    protected static $config_group = 'uis-git';
 
     /**
      * 获取一个缓存实例

@@ -1,13 +1,9 @@
 <?php
-use FFan\Std\Common\Config as FFanConfig;
+use UiStd\Common\Config as UisConfig;
 
-FFanConfig::addArray(
+UisConfig::addArray(
     array(
-        'ffan-logger:web' => array(
-            'file' => 'test',
-            'path' => 'test'
-        ),
-        'ffan-git:main' => array(
+        'uis-git:main' => array(
             'url' => 'http://github.com/dop/php.git'
         ),
         'runtime_path' => __DIR__ . '/runtime',

@@ -1,9 +1,9 @@
 {
-  "name": "ffan/std-git",
-  "description": "FFan php git components",
+  "name": "uistd/git",
+  "description": "UI Service 简单的PHP Git工具，主要用于代码自动化生成之后，自动将代码push入库",
   "keywords": [
-    "ffan",
-    "php",
+    "ui service",
+    "uistd",
     "git"
   ],
   "type": "composer",
@@ -16,12 +16,12 @@
   ],
   "require": {
     "php": ">=5.5.0",
-    "ffan/std-common": "2.*",
-    "ffan/std-logger": "1.*"
+    "uistd/common": "3.*",
+    "uistd/logger": "2.*"
   },
   "autoload": {
     "psr-4": {
-      "FFan\\Std\\Git\\": "src"
+      "UiStd\\Git\\": "src"
     }
   },
   "minimum-stability": "stable",

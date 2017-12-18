@@ -1,17 +1,17 @@
 <?php
 
-namespace FFan\Std\Git;
+namespace UiStd\Git;
 
-use FFan\Std\Common\ConfigBase;
-use FFan\Std\Common\InvalidConfigException;
-use FFan\Std\Common\Utils as FFanUtils;
-use FFan\Std\Common\Str as FFanStr;
-use FFan\Std\Logger\LogHelper;
-use FFan\Std\Logger\LogRouter;
+use UiStd\Common\ConfigBase;
+use UiStd\Common\InvalidConfigException;
+use UiStd\Common\Utils as UisUtils;
+use UiStd\Common\Str as UisStr;
+use UiStd\Logger\LogHelper;
+use UiStd\Logger\LogRouter;
 
 /**
  * Class GitRepo
- * @package FFan\Std\Git
+ * @package UiStd\Git
  */
 class GitRepo extends ConfigBase
 {
@@ -51,7 +51,7 @@ class GitRepo extends ConfigBase
         $this->initConfig($config_arr);
         $this->logger = LogHelper::getLogRouter();
         $this->bin_path = $this->getConfigString('git_bin', '/usr/bin/git');
-        $this->repo_path = FFanUtils::fixWithRuntimePath($this->getConfigString('repo_path', $this->name));
+        $this->repo_path = UisUtils::fixWithRuntimePath($this->getConfigString('repo_path', $this->name));
     }
 
     /**
@@ -60,7 +60,7 @@ class GitRepo extends ConfigBase
      */
     public function init()
     {
-        $git_dir = FFanUtils::joinPath($this->repo_path, '.git');
+        $git_dir = UisUtils::joinPath($this->repo_path, '.git');
         if (!is_dir($this->repo_path) || !is_dir($git_dir)) {
             $this->cloneFromRemote();
             if (!is_dir($git_dir)) {
@@ -328,9 +328,9 @@ class GitRepo extends ConfigBase
         if (empty($status_str)) {
             return $result;
         }
-        $status_lines = FFanStr::split($status_str, PHP_EOL);
+        $status_lines = UisStr::split($status_str, PHP_EOL);
         foreach( $status_lines as $each_line) {
-            $tmp = FFanStr::split($each_line, ' ');
+            $tmp = UisStr::split($each_line, ' ');
             //如果是以 . 开始的文件, 忽略
             if (empty($tmp[1])) {
                 continue;
